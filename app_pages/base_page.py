@@ -31,7 +31,7 @@ class BasePage:
         self.assert_visible(locator, timeout)
 
     def assert_text(self, locator, expected_text, timeout=10):
-        """Asserts that an element contains the expected text."""
+
         element = self.find_element(locator, timeout)
         actual_text = element.text
         assert actual_text == expected_text, f"Expected text '{expected_text}', but got '{actual_text}'."
