@@ -42,10 +42,11 @@ class BasePage:
         assert element.is_enabled(), f"Element with locator {locator} is not enabled."
 
     def assert_attribute(self, locator, attribute_name, expected_value, timeout=10):
-        """Asserts that an element has a specific attribute value."""
+
         element = self.find_element(locator, timeout)
         actual_value = element.get_attribute(attribute_name)
         assert actual_value == expected_value, (
             f"Expected attribute '{attribute_name}' to be '{expected_value}', but got '{actual_value}'."
         )
+
 
