@@ -37,7 +37,7 @@ class BasePage:
         assert actual_text == expected_text, f"Expected text '{expected_text}', but got '{actual_text}'."
 
     def assert_enabled(self, locator, timeout=10):
-        """Asserts that an element is enabled."""
+
         element = self.find_element(locator, timeout)
         assert element.is_enabled(), f"Element with locator {locator} is not enabled."
 
