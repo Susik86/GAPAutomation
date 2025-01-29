@@ -6,7 +6,7 @@ fake = Faker()
 class UsersData:
 
     valid_emails = [
-        "susanna.karapetyan@volo.global",
+        # "susanna.karapetyan@volo.global",
         "anahit.arustamyan@volo.global"
 
     ]

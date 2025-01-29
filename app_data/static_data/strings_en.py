@@ -9,7 +9,7 @@ class StringsEn:
         bottom_txt = ""
 
     class DashboardPage:
-        title = 'Where can you apply this Genius thinking today?'
+        title = 'Swipe for Genius'
         subtitle = ''
         email_placeholder = 'Email'
         password_placeholder = 'Password'

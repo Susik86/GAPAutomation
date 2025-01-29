@@ -1,30 +1,21 @@
 from appium import webdriver
-from appium.options.android import UiAutomator2Options
-from config.config import Config
+from appium.webdriver.webdriver import AppiumOptions
+from config_file.config import CONFIG
 
-class Driver:
+class DriverFactory:
     @staticmethod
     def create_driver(platform: str):
-        # Fetch capabilities from the Config class
-        capabilities = Config.get_capabilities(platform)
-        print(f"Capabilities received: {capabilities}")
+        if platform not in CONFIG:
+            raise ValueError(f"Invalid platform: {platform}")
 
-        # Create AppiumOptions for Android
-        if platform == "android":
-            options = UiAutomator2Options()
-            for key, value in capabilities.items():
-                options.set_capability(key, value)
-        else:
-            raise ValueError(f"Unsupported platform: {platform}")
+        capabilities = CONFIG[platform]
 
-        # Start the driver
-        try:
-            driver = webdriver.Remote(
-                command_executor="http://localhost:4723/wd/hub",
-                options=options
-            )
-            print("App successfully launched.")
-            return driver
-        except Exception as e:
-            print(f"Error launching the app: {e}")
-            raise RuntimeError(f"Failed to create driver for platform {platform}: {e}")
+        options = AppiumOptions()
+        for key, value in capabilities.items():
+            options.set_capability(key, value)
+
+        driver = webdriver.Remote(
+            command_executor='http://localhost:4723/wd/hub',
+            options=options  # Use options instead of desired_capabilities
+        )
+        return driver
