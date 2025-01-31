@@ -1,64 +1,46 @@
-import random
 import pytest
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-
+import logging
+import random
 from app_pages.login_page import LoginPage
 from app_pages.dashboard_page import DashboardPage
 from app_data.static_data.users import UsersData
 from app_data.static_data.strings_en import StringsEn
-from app_driver.driver_setup import DriverFactory
+from app_data.dynamic_data.data_handler import save_data, get_data
 
-from locators.ANDROID_LOCATORS.android_login_locators import AndroidLoginScreenLocators
+@pytest.mark.usefixtures("driver", "platform")  # ✅ FIX: Այստեղ ավելացվում է platform-ը
+class TestLogin:
+    """ Test Class for login functionality """
 
-
-@pytest.fixture
-def driver(request):
-    """
-    Initializes the Appium driver based on the platform specified in command line arguments.
-    """
-    platform = request.config.getoption("--platform", default="android")
-    driver = DriverFactory.create_driver(platform)
-    yield driver
-    driver.quit()
+    def setup_method(self, method, driver, platform):  # ✅ FIX: Ստանում ենք driver-ը ֆիքստուրայից
+        logging.info("🔹 Setting up Login Test")
+        self.driver = driver
+        self.platform = platform
+        self.login_page = LoginPage(self.driver, self.platform)
+        self.dashboard_page = DashboardPage(self.driver, self.platform)
 
 
-# Test to verify the app opens to the login screen
-def test_open_app(driver, request):
-    """
-    Verify the login screen is displayed.
-    """
-    try:
-        WebDriverWait(driver, 10).until(
-            lambda d: d.find_element(By.ID, AndroidLoginScreenLocators.LOGIN_BUTTON)
-        )
-        print("Login screen is displayed.")
-    except Exception as e:
-        raise AssertionError(f"Login screen not found. Error: {e}")
+    def test_login(self):
+        """ Perform login with valid credentials and verify the dashboard title. """
+        logging.info(f"🔹 Running login test on: {self.platform}")
 
+        # Get user credentials dynamically
+        email = random.choice(UsersData.valid_emails)
+        password = UsersData.valid_password
 
-# Test for login and dashboard title verification
-def test_login(driver, request):
-    """
-    Perform login with valid credentials and verify the dashboard title.
-    """
-    # Fetch platform dynamically
-    platform = request.config.getoption("--platform", default="android")
-    print(f"Platform received in test: {platform}")
+        # Save login credentials
+        save_data("last_used_email", email)
+        save_data("last_used_password", password)
 
-    # Initialize Pages
-    login_page = LoginPage(driver, platform)
-    dashboard_page = DashboardPage(driver, platform)
-    strings = StringsEn().DashboardPage()
+        logging.info(f"🔐 Logging in with: {email} / {password}")
 
-    # Get user credentials
-    email = random.choice(UsersData.valid_emails)
-    password = UsersData.valid_password
+        # Perform login
+        self.login_page.login(email, password)
 
-    # Perform login
-    login_page.login(email, password)
+        # Ensure login is successful
+        assert self.login_page.is_login_successful(), "❌ Login failed!"
 
-    # Verify dashboard title visibility and text
-    dashboard_page.assert_title_visible()
-    dashboard_page.assert_title_text(strings.title)
-    print(f"Dashboard title verified: {strings.title}")
+        # Verify dashboard title visibility and text
+        self.dashboard_page.assert_title_visible()
+        self.dashboard_page.assert_title_text(StringsEn().DashboardPage().title)
+
+        logging.info(f"✅ Dashboard title verified successfully: {StringsEn().DashboardPage().title}")
